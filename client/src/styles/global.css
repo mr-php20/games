@@ -536,6 +536,76 @@ input[type="text"]::placeholder {
   to { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
+/* Completed line cells */
+.game-cell.in-completed-line {
+  background: rgba(0, 206, 201, 0.25);
+  border-color: var(--secondary);
+}
+
+/* SVG line strike overlay */
+.grid-with-lines {
+  position: relative;
+}
+
+.line-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.strike-line {
+  stroke: var(--accent);
+  stroke-width: 0.06;
+  stroke-linecap: round;
+  opacity: 0.8;
+  animation: lineSlash 0.4s ease forwards;
+}
+
+@keyframes lineSlash {
+  from { stroke-dasharray: 8; stroke-dashoffset: 8; }
+  to { stroke-dasharray: 8; stroke-dashoffset: 0; }
+}
+
+/* ===== Toggle / Preferences ===== */
+.preference-section {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  justify-content: center;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid #333;
+  transition: border-color 0.2s;
+}
+
+.toggle-label:hover {
+  border-color: var(--primary-light);
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.toggle-text {
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
 /* Called numbers */
 .called-numbers {
   width: 100%;

@@ -5,6 +5,7 @@ import {
   getRoomBySocketId,
   removePlayer,
   setSeriesConfig,
+  setHideOpponentStatus,
   setRoomPhase,
   getPlayersArray,
 } from './roomManager.js';
@@ -14,6 +15,7 @@ import {
   checkSeriesWin,
   nextRound,
   resetSeries,
+  continueGame,
 } from './gameEngine.js';
 
 export function registerSocketHandlers(io: Server): void {
@@ -52,6 +54,7 @@ export function registerSocketHandlers(io: Server): void {
           playerId: player.id,
           players: getPlayersArray(room),
           bestOf: room.series.bestOf,
+          hideOpponentStatus: room.series.hideOpponentStatus,
         });
         socket.to(room.code).emit('player-joined', {
           player: { id: player.id, name: player.name },
@@ -77,6 +80,23 @@ export function registerSocketHandlers(io: Server): void {
         }
         setSeriesConfig(room.code, bestOf);
         io.to(room.code).emit('series-updated', { bestOf });
+      } catch (err: unknown) {
+        socket.emit('error', { message: (err as Error).message });
+      }
+    });
+
+    // ---- SET HIDE OPPONENT STATUS ----
+    socket.on('set-hide-opponent', ({ hide }: { hide: boolean }) => {
+      try {
+        const result = getRoomBySocketId(socket.id);
+        if (!result) return;
+        const { room, player } = result;
+        if (player.id !== room.hostId) {
+          socket.emit('error', { message: 'Only the host can change this setting' });
+          return;
+        }
+        setHideOpponentStatus(room.code, !!hide);
+        io.to(room.code).emit('hide-opponent-updated', { hide: !!hide });
       } catch (err: unknown) {
         socket.emit('error', { message: (err as Error).message });
       }
@@ -199,6 +219,25 @@ export function registerSocketHandlers(io: Server): void {
         const { room } = result;
 
         resetSeries(room);
+        io.to(room.code).emit('game-start', { phase: 'setup' });
+      } catch (err: unknown) {
+        socket.emit('error', { message: (err as Error).message });
+      }
+    });
+
+    // ---- CONTINUE GAME (keep scores, play more) ----
+    socket.on('continue-game', () => {
+      try {
+        const result = getRoomBySocketId(socket.id);
+        if (!result) return;
+        const { room } = result;
+
+        if (room.phase !== 'series-end' && room.phase !== 'round-end') {
+          socket.emit('error', { message: 'Cannot continue from this state' });
+          return;
+        }
+
+        continueGame(room);
         io.to(room.code).emit('game-start', { phase: 'setup' });
       } catch (err: unknown) {
         socket.emit('error', { message: (err as Error).message });

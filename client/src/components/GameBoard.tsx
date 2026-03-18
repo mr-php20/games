@@ -1,16 +1,28 @@
 import { useGame } from '../context/GameContext';
-import { GRID_SIZE, BINGO_LETTERS } from '../utils/bingo';
+import { GRID_SIZE, BINGO_LETTERS, getCompletedLines } from '../utils/bingo';
+import type { CompletedLine } from '../utils/bingo';
+
+function isCellInCompletedLine(row: number, col: number, lines: CompletedLine[]): boolean {
+  return lines.some(line => {
+    if (line.type === 'row') return line.index === row;
+    if (line.type === 'col') return line.index === col;
+    if (line.type === 'diag') return row === col;
+    if (line.type === 'anti-diag') return row + col === GRID_SIZE - 1;
+    return false;
+  });
+}
 
 export default function GameBoard() {
   const { state, callNumber } = useGame();
   const {
     grid, marked, playerId, currentTurn,
     calledNumbers, myCompletedLines, opponentCompletedLines,
-    players, currentRound, bestOf, scores,
+    players, currentRound, bestOf, scores, hideOpponentStatus,
   } = state;
 
   const isMyTurn = currentTurn === playerId;
   const opponent = players.find(p => p.id !== playerId);
+  const completedLines = getCompletedLines(marked);
 
   const handleCellClick = (row: number, col: number) => {
     if (!isMyTurn) return;
@@ -22,9 +34,11 @@ export default function GameBoard() {
   return (
     <div className="screen game-screen">
       <div className="game-header">
-        <div className="round-info">
-          Round {currentRound} of {bestOf}
-        </div>
+        {bestOf > 1 && (
+          <div className="round-info">
+            Round {currentRound} of {bestOf}
+          </div>
+        )}
         <div className={`turn-indicator ${isMyTurn ? 'my-turn' : 'opponent-turn'}`}>
           {isMyTurn ? '🟢 Your Turn' : `🔴 ${opponent?.name ?? "Opponent"}'s Turn`}
         </div>
@@ -39,17 +53,19 @@ export default function GameBoard() {
             </span>
           ))}
         </div>
-        <div className="bingo-row">
-          <span className="bingo-label">{opponent?.name ?? 'Opp'}: </span>
-          {BINGO_LETTERS.map((letter, i) => (
-            <span key={letter} className={`bingo-letter opponent ${i < opponentCompletedLines ? 'lit' : ''}`}>
-              {letter}
-            </span>
-          ))}
-        </div>
+        {!hideOpponentStatus && (
+          <div className="bingo-row">
+            <span className="bingo-label">{opponent?.name ?? 'Opp'}: </span>
+            {BINGO_LETTERS.map((letter, i) => (
+              <span key={letter} className={`bingo-letter opponent ${i < opponentCompletedLines ? 'lit' : ''}`}>
+                {letter}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {scores.length > 0 && (
+      {scores.length > 0 && bestOf > 1 && (
         <div className="mini-scoreboard">
           {scores.map(s => (
             <span key={s.id} className="mini-score">
@@ -59,17 +75,18 @@ export default function GameBoard() {
         </div>
       )}
 
-      <div className="grid-container">
+      <div className="grid-container grid-with-lines">
         {Array.from({ length: GRID_SIZE }, (_, r) => (
           <div key={r} className="grid-row">
             {Array.from({ length: GRID_SIZE }, (_, c) => {
               const num = grid[r][c];
               const isMarked = marked[r][c];
               const canCall = isMyTurn && num > 0 && !calledNumbers.includes(num);
+              const inLine = isCellInCompletedLine(r, c, completedLines);
               return (
                 <button
                   key={c}
-                  className={`grid-cell game-cell ${isMarked ? 'marked' : ''} ${canCall ? 'callable' : ''}`}
+                  className={`grid-cell game-cell ${isMarked ? 'marked' : ''} ${canCall ? 'callable' : ''} ${inLine ? 'in-completed-line' : ''}`}
                   onClick={() => handleCellClick(r, c)}
                   disabled={!canCall}
                 >
@@ -80,6 +97,28 @@ export default function GameBoard() {
             })}
           </div>
         ))}
+        {/* SVG overlay for line strikes */}
+        <svg className="line-overlay" viewBox={`0 0 ${GRID_SIZE} ${GRID_SIZE}`} preserveAspectRatio="none">
+          {completedLines.map((line, i) => {
+            let x1: number, y1: number, x2: number, y2: number;
+            if (line.type === 'row') {
+              x1 = 0; y1 = line.index + 0.5; x2 = GRID_SIZE; y2 = line.index + 0.5;
+            } else if (line.type === 'col') {
+              x1 = line.index + 0.5; y1 = 0; x2 = line.index + 0.5; y2 = GRID_SIZE;
+            } else if (line.type === 'diag') {
+              x1 = 0; y1 = 0; x2 = GRID_SIZE; y2 = GRID_SIZE;
+            } else {
+              x1 = GRID_SIZE; y1 = 0; x2 = 0; y2 = GRID_SIZE;
+            }
+            return (
+              <line
+                key={i}
+                x1={x1} y1={y1} x2={x2} y2={y2}
+                className="strike-line"
+              />
+            );
+          })}
+        </svg>
       </div>
 
       <div className="called-numbers">

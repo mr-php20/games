@@ -96,3 +96,42 @@ export function cellIndex(row: number, col: number): number {
 export function indexToCell(index: number): { row: number; col: number } {
   return { row: Math.floor(index / GRID_SIZE), col: index % GRID_SIZE };
 }
+
+export type CompletedLine =
+  | { type: 'row'; index: number }
+  | { type: 'col'; index: number }
+  | { type: 'diag'; index: 0 }
+  | { type: 'anti-diag'; index: 0 };
+
+/**
+ * Get the list of completed lines with their type and index.
+ */
+export function getCompletedLines(marked: boolean[][]): CompletedLine[] {
+  const lines: CompletedLine[] = [];
+
+  for (let r = 0; r < GRID_SIZE; r++) {
+    if (marked[r].every(v => v)) lines.push({ type: 'row', index: r });
+  }
+
+  for (let c = 0; c < GRID_SIZE; c++) {
+    let complete = true;
+    for (let r = 0; r < GRID_SIZE; r++) {
+      if (!marked[r][c]) { complete = false; break; }
+    }
+    if (complete) lines.push({ type: 'col', index: c });
+  }
+
+  let diagComplete = true;
+  for (let i = 0; i < GRID_SIZE; i++) {
+    if (!marked[i][i]) { diagComplete = false; break; }
+  }
+  if (diagComplete) lines.push({ type: 'diag', index: 0 });
+
+  let antiDiagComplete = true;
+  for (let i = 0; i < GRID_SIZE; i++) {
+    if (!marked[i][GRID_SIZE - 1 - i]) { antiDiagComplete = false; break; }
+  }
+  if (antiDiagComplete) lines.push({ type: 'anti-diag', index: 0 });
+
+  return lines;
+}

@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 
 export default function Home() {
   const { state, dispatch, createRoom, joinRoom } = useGame();
-  const [mode, setMode] = useState<'menu' | 'create' | 'join'>('menu');
+  const [mode, setMode] = useState<'menu' | 'join'>('menu');
   const [code, setCode] = useState('');
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +40,7 @@ export default function Home() {
           />
           <button
             className="btn btn-primary"
-            onClick={() => { if (state.playerName.trim()) setMode('create'); }}
+            onClick={handleCreate}
             disabled={!state.playerName.trim()}
           >
             Create Game
@@ -51,18 +51,6 @@ export default function Home() {
             disabled={!state.playerName.trim()}
           >
             Join Game
-          </button>
-        </div>
-      )}
-
-      {mode === 'create' && (
-        <div className="home-actions">
-          <p className="info-text">Ready to create a game, <strong>{state.playerName}</strong>?</p>
-          <button className="btn btn-primary" onClick={handleCreate}>
-            Create Room
-          </button>
-          <button className="btn btn-text" onClick={() => setMode('menu')}>
-            Back
           </button>
         </div>
       )}

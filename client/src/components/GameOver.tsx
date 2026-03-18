@@ -1,11 +1,12 @@
 import { useGame } from '../context/GameContext';
 
 export default function GameOver() {
-  const { state, nextRound, rematch, goHome } = useGame();
+  const { state, nextRound, continueGame, rematch, goHome } = useGame();
   const { roundWinner, playerId, scores, currentRound, bestOf } = state;
 
   const iWon = roundWinner?.id === playerId;
   const isSeriesEnd = state.screen === 'series-end';
+  const isSingleGame = bestOf === 1;
 
   // Find series winner
   const seriesWinner = isSeriesEnd
@@ -15,41 +16,48 @@ export default function GameOver() {
 
   return (
     <div className="screen gameover-screen">
-      {!isSeriesEnd ? (
+      {isSingleGame || isSeriesEnd ? (
+        <>
+          <h2 className={`result-title ${(isSingleGame ? iWon : iWonSeries) ? 'win' : 'lose'}`}>
+            {(isSingleGame ? iWon : iWonSeries) ? '🏆 You Won!' : '😔 You Lost'}
+          </h2>
+          {!isSingleGame && <p className="round-detail">Best of {bestOf}</p>}
+        </>
+      ) : (
         <>
           <h2 className={`result-title ${iWon ? 'win' : 'lose'}`}>
             {iWon ? '🎉 You Won the Round!' : '😔 You Lost the Round'}
           </h2>
           <p className="round-detail">Round {currentRound} of {bestOf}</p>
         </>
-      ) : (
-        <>
-          <h2 className={`result-title ${iWonSeries ? 'win' : 'lose'}`}>
-            {iWonSeries ? '🏆 You Won the Series!' : '😔 Series Lost'}
-          </h2>
-          <p className="round-detail">Best of {bestOf}</p>
-        </>
       )}
 
-      <div className="final-scores">
-        {scores.map(s => (
-          <div key={s.id} className={`score-card ${s.id === playerId ? 'me' : ''}`}>
-            <span className="score-name">{s.id === playerId ? 'You' : s.name}</span>
-            <span className="score-value">{s.score}</span>
-          </div>
-        ))}
-      </div>
+      {!isSingleGame && (
+        <div className="final-scores">
+          {scores.map(s => (
+            <div key={s.id} className={`score-card ${s.id === playerId ? 'me' : ''}`}>
+              <span className="score-name">{s.id === playerId ? 'You' : s.name}</span>
+              <span className="score-value">{s.score}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="gameover-actions">
-        {!isSeriesEnd && (
+        {!isSeriesEnd && !isSingleGame && (
           <button className="btn btn-primary" onClick={nextRound}>
             Next Round →
           </button>
         )}
-        {isSeriesEnd && (
-          <button className="btn btn-primary" onClick={rematch}>
-            🔄 Rematch
-          </button>
+        {(isSeriesEnd || isSingleGame) && (
+          <>
+            <button className="btn btn-primary" onClick={continueGame}>
+              ▶ Continue Playing
+            </button>
+            <button className="btn btn-secondary" onClick={rematch}>
+              🔄 Rematch (Reset Scores)
+            </button>
+          </>
         )}
         <button className="btn btn-text" onClick={goHome}>
           🏠 Back to Home

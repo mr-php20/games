@@ -19,6 +19,7 @@ export interface GameState {
   isHost: boolean;
   players: PlayerInfo[];
   bestOf: number;
+  hideOpponentStatus: boolean;
   // Grid setup
   grid: number[][];         // 5x5, 0 = empty
   placementStack: number[]; // cell indices in order placed
@@ -46,7 +47,8 @@ export const initialGameState: GameState = {
   roomCode: null,
   isHost: false,
   players: [],
-  bestOf: 3,
+  bestOf: 1,
+  hideOpponentStatus: false,
   grid: Array.from({ length: 5 }, () => Array(5).fill(0)),
   placementStack: [],
   gridReady: false,

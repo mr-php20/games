@@ -228,3 +228,16 @@ export function resetSeries(room: Room): void {
     resetPlayerState(player);
   }
 }
+
+/**
+ * Continue playing after a series ends. Keeps scores, starts a new round.
+ */
+export function continueGame(room: Room): void {
+  room.currentRound++;
+  room.roundState = null;
+  room.phase = 'setup';
+
+  for (const player of room.players.values()) {
+    resetPlayerState(player);
+  }
+}

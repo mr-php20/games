@@ -2,8 +2,8 @@ import { useGame } from '../context/GameContext';
 import { useCallback } from 'react';
 
 export default function Lobby() {
-  const { state, setSeries, startGame, goHome } = useGame();
-  const { roomCode, players, bestOf, isHost } = state;
+  const { state, setSeries, setHideOpponent, startGame, goHome } = useGame();
+  const { roomCode, players, bestOf, isHost, hideOpponentStatus } = state;
 
   const handleShare = useCallback(async () => {
     const shareText = `Join my Bingo game! Code: ${roomCode}`;
@@ -24,7 +24,7 @@ export default function Lobby() {
     }
   }, [roomCode]);
 
-  const seriesOptions = [3, 5, 7, 9];
+  const seriesOptions = [1, 3, 5, 7, 9];
 
   return (
     <div className="screen lobby-screen">
@@ -59,7 +59,7 @@ export default function Lobby() {
 
       {isHost && (
         <div className="series-section">
-          <p className="label">Series Format</p>
+          <p className="label">Game Format</p>
           <div className="series-options">
             {seriesOptions.map(n => (
               <button
@@ -67,7 +67,7 @@ export default function Lobby() {
                 className={`btn btn-series ${bestOf === n ? 'active' : ''}`}
                 onClick={() => setSeries(n)}
               >
-                Best of {n}
+                {n === 1 ? 'Single' : `Best of ${n}`}
               </button>
             ))}
           </div>
@@ -76,7 +76,26 @@ export default function Lobby() {
 
       {!isHost && (
         <div className="series-section">
-          <p className="label">Series: Best of {bestOf}</p>
+          <p className="label">{bestOf === 1 ? 'Single Game' : `Series: Best of ${bestOf}`}</p>
+        </div>
+      )}
+
+      {isHost && (
+        <div className="preference-section">
+          <label className="toggle-label">
+            <input
+              type="checkbox"
+              checked={hideOpponentStatus}
+              onChange={e => setHideOpponent(e.target.checked)}
+            />
+            <span className="toggle-text">Hide opponent's progress</span>
+          </label>
+        </div>
+      )}
+
+      {!isHost && hideOpponentStatus && (
+        <div className="preference-section">
+          <p className="info-text">🙈 Opponent progress will be hidden</p>
         </div>
       )}
 

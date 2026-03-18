@@ -9,7 +9,8 @@ export interface Player {
 }
 
 export interface SeriesConfig {
-  bestOf: number; // must be odd: 3, 5, 7, ...
+  bestOf: number; // must be odd: 1, 3, 5, 7, ...
+  hideOpponentStatus: boolean;
 }
 
 export interface RoundState {

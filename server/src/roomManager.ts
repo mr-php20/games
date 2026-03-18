@@ -30,7 +30,7 @@ export function createRoom(socketId: string, playerName: string): { room: Room; 
     code,
     hostId: playerId,
     players: new Map([[playerId, player]]),
-    series: { bestOf: 3 },
+    series: { bestOf: 1, hideOpponentStatus: false },
     scores: new Map([[playerId, 0]]),
     currentRound: 1,
     roundState: null,
@@ -136,8 +136,14 @@ export function removePlayer(socketId: string): { room: Room; player: Player } |
 export function setSeriesConfig(code: string, bestOf: number): void {
   const room = rooms.get(code);
   if (!room) throw new Error('Room not found');
-  if (bestOf < 1 || bestOf % 2 === 0) throw new Error('Best-of must be a positive odd number');
+  if (bestOf < 1 || bestOf % 2 === 0) throw new Error('Best-of must be a positive odd number (1, 3, 5, ...)');
   room.series.bestOf = bestOf;
+}
+
+export function setHideOpponentStatus(code: string, hide: boolean): void {
+  const room = rooms.get(code);
+  if (!room) throw new Error('Room not found');
+  room.series.hideOpponentStatus = hide;
 }
 
 export function setRoomPhase(code: string, phase: RoomPhase): void {

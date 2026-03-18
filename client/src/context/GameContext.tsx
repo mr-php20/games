@@ -8,9 +8,10 @@ import { createEmptyGrid, createEmptyMarked, findNumberPosition, countCompletedL
 type Action =
   | { type: 'SET_PLAYER_NAME'; name: string }
   | { type: 'ROOM_CREATED'; code: string; playerId: string }
-  | { type: 'ROOM_JOINED'; playerId: string; players: PlayerInfo[]; bestOf: number }
+  | { type: 'ROOM_JOINED'; playerId: string; players: PlayerInfo[]; bestOf: number; hideOpponentStatus: boolean }
   | { type: 'PLAYER_JOINED'; player: PlayerInfo }
   | { type: 'SERIES_UPDATED'; bestOf: number }
+  | { type: 'HIDE_OPPONENT_UPDATED'; hide: boolean }
   | { type: 'GAME_START' }
   | { type: 'PLACE_NUMBER'; row: number; col: number }
   | { type: 'UNDO_LAST' }
@@ -48,6 +49,7 @@ function reducer(state: GameState, action: Action): GameState {
         playerId: action.playerId,
         players: action.players,
         bestOf: action.bestOf,
+        hideOpponentStatus: action.hideOpponentStatus,
         isHost: false,
         screen: 'lobby',
         error: null,
@@ -61,6 +63,9 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'SERIES_UPDATED':
       return { ...state, bestOf: action.bestOf };
+
+    case 'HIDE_OPPONENT_UPDATED':
+      return { ...state, hideOpponentStatus: action.hide };
 
     case 'GAME_START':
       return {
@@ -261,10 +266,12 @@ interface GameContextType {
   createRoom: () => void;
   joinRoom: (code: string) => void;
   setSeries: (bestOf: number) => void;
+  setHideOpponent: (hide: boolean) => void;
   startGame: () => void;
   submitGrid: () => void;
   callNumber: (num: number) => void;
   nextRound: () => void;
+  continueGame: () => void;
   rematch: () => void;
   goHome: () => void;
 }
@@ -289,8 +296,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'ROOM_CREATED', code: data.code, playerId: data.playerId });
     });
 
-    socket.on('room-joined', (data: { playerId: string; players: PlayerInfo[]; bestOf: number }) => {
-      dispatch({ type: 'ROOM_JOINED', playerId: data.playerId, players: data.players, bestOf: data.bestOf });
+    socket.on('room-joined', (data: { playerId: string; players: PlayerInfo[]; bestOf: number; hideOpponentStatus: boolean }) => {
+      dispatch({ type: 'ROOM_JOINED', playerId: data.playerId, players: data.players, bestOf: data.bestOf, hideOpponentStatus: data.hideOpponentStatus ?? false });
     });
 
     socket.on('player-joined', (data: { player: PlayerInfo }) => {
@@ -299,6 +306,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     socket.on('series-updated', (data: { bestOf: number }) => {
       dispatch({ type: 'SERIES_UPDATED', bestOf: data.bestOf });
+    });
+
+    socket.on('hide-opponent-updated', (data: { hide: boolean }) => {
+      dispatch({ type: 'HIDE_OPPONENT_UPDATED', hide: data.hide });
     });
 
     socket.on('game-start', () => {
@@ -351,6 +362,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     socketRef.current?.emit('set-series', { bestOf });
   }, []);
 
+  const setHideOpponent = useCallback((hide: boolean) => {
+    socketRef.current?.emit('set-hide-opponent', { hide });
+  }, []);
+
   const startGame = useCallback(() => {
     socketRef.current?.emit('start-game');
   }, []);
@@ -365,6 +380,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const nextRoundFn = useCallback(() => {
     socketRef.current?.emit('next-round');
+  }, []);
+
+  const continueGameFn = useCallback(() => {
+    socketRef.current?.emit('continue-game');
   }, []);
 
   const rematch = useCallback(() => {
@@ -385,10 +404,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       createRoom,
       joinRoom,
       setSeries,
+      setHideOpponent,
       startGame,
       submitGrid: submitGridFn,
       callNumber: callNumberFn,
       nextRound: nextRoundFn,
+      continueGame: continueGameFn,
       rematch,
       goHome,
     }}>
