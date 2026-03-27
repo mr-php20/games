@@ -286,6 +286,98 @@ input[type="text"]::placeholder {
   100% { transform: scale(1); }
 }
 
+/* --- Rules Modal --- */
+.rules-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.rules-btn:hover {
+  border-color: var(--accent-1);
+  color: var(--accent-1);
+}
+
+.rules-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 17, 23, 0.85);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+  padding: 1rem;
+}
+
+.rules-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card-hover);
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: scaleIn 0.3s ease;
+  padding: 2rem;
+}
+
+.rules-card h2 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rules-card h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-1);
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.rules-card p,
+.rules-card li {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.rules-card ul {
+  padding-left: 1.2rem;
+  margin: 0.3rem 0;
+}
+
+.rules-card li {
+  margin-bottom: 0.25rem;
+}
+
+.rules-close {
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: center;
+}
+
 /* --- Responsive --- */
 @media (max-width: 480px) {
   .game-header h1 { font-size: 1.3rem; }

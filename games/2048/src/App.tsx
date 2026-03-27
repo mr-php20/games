@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from './hooks/useGame';
 import { TileData } from './utils/game';
 
@@ -39,12 +40,14 @@ function Tile({ tile }: { tile: TileData }) {
 
 export default function App() {
   const { tiles, score, bestScore, gameOver, won, newGame, keepPlaying } = useGame();
+  const [showRules, setShowRules] = useState(false);
 
   return (
     <div className="game-app">
       <div className="game-header">
         <a href="/" className="back-link">← Games</a>
         <h1>2048</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
         <button className="btn btn-secondary" onClick={newGame}>New</button>
       </div>
 
@@ -71,6 +74,28 @@ export default function App() {
       </div>
 
       <p className="hint-text">Use arrow keys, WASD, or swipe to play</p>
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play 2048</h2>
+            <h3>Goal</h3>
+            <p>Combine tiles to create a tile with the number 2048.</p>
+            <h3>Rules</h3>
+            <ul>
+              <li>Slide tiles using <strong>arrow keys</strong>, <strong>WASD</strong>, or <strong>swipe</strong>.</li>
+              <li>When two tiles with the same number collide, they <strong>merge into one</strong> with double the value.</li>
+              <li>After each move, a new tile (2 or 4) appears in a random empty spot.</li>
+              <li>The game ends when no more moves are possible.</li>
+            </ul>
+            <h3>Scoring</h3>
+            <p>Your score increases by the value of each merged tile. Try to beat your best score!</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {(gameOver || won) && (
         <div className="game-over-overlay">

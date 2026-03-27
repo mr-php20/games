@@ -1,136 +1,94 @@
 // Aadu Puli Aattam (Goats & Tigers)
-// Board: 23 points on a triangular grid
-// 3 Tigers, 15 Goats
-// Phase 1: Goat player places goats on empty points
-// Phase 2: Both sides move; tigers can jump over goats to capture
-// Tigers win if they capture 5+ goats; Goats win if all 3 tigers are trapped
+// Board: Triangle (top) + Square grid (bottom) — the classic Pulijudam board
+//
+//          0                    (apex)
+//        / | \
+//       1--2--3                 (triangle row 1)
+//      /|\ | /|\
+//     4--5--6--7--8             (triangle base = square row 0)
+//     |\/|\/|\/|\/|
+//     9-10-11-12-13             (square row 1)
+//     |/\|/\|/\|/\|
+//    14-15-16-17-18             (square row 2)
+//     |\/|\/|\/|\/|
+//    19-20-21-22-23             (square row 3)
+//
+// 24 nodes total: 1 + 3 + 5×4 = 24
 
 export type Piece = 'tiger' | 'goat' | null;
 export type Player = 'tiger' | 'goat';
 export type Phase = 'placing' | 'moving';
 
-// Board layout: 5 rows
-// Row 0: 1 point (apex)
-// Row 1: 3 points
-// Row 2: 5 points
-// Row 3: 3 points (inner triangle base, optional)
-// Actually, use the classic Pulijudam board:
-// 5x5 grid of intersections forming the base square + triangle on top
-// Classic layout: a 5×5 grid with diagonals, plus a triangle on one side.
-//
-// Simpler encoding: use node IDs 0-22 with an adjacency list.
-// Standard Aadu Puli Aattam board (Lambs and Tigers):
-//
-//       0
-//      / \
-//     1---2
-//    /|\ /|\
-//   3-4-5-6-7
-//    \|/ \|/
-//     8---9
-//      \ /
-//      10
-//   (plus the extension below forming a square base)
-//
-// Actually, the most common south Indian board is a triangle grid:
-//
-// Let me use the standard 5-row triangle + inverse triangle (23 nodes):
-// More commonly it's played on a simpler 25-point board or 23-point board.
-//
-// Let's use the classic "Puliattam" board which is a triangle:
-//       0
-//      / \
-//     1---2
-//    / \ / \
-//   3---4---5
-//  / \ / \ / \
-// 6---7---8---9
-//  \ / \ / \ /
-//  10--11--12
-//   \ / \ /
-//   13--14
-//    \ /
-//    15  -- not standard
-//
-// Actually, let me use the well-known 5-row board with the base quadrilateral:
-// The most standard "Aadu Puli Aattam" board is:
-// A 5x5 grid of points forming a diamond/rhombus-like structure.
-//
-// Simplest correct board: use a triangle (top) + inverted triangle (bottom)
-// giving us a hexagonal arrangement. But the MOST classic board is actually
-// just a grid:
-//
-//  0--1--2--3--4
-//  |\/|\/|\/|\/|
-//  5--6--7--8--9
-//  |/\|/\|/\|/\|
-// 10-11-12-13-14
-//  |\/|\/|\/|\/|
-// 15-16-17-18-19
-//  |/\|/\|/\|/\|
-// 20-21-22-23-24
-//
-// This is the standard 25-point board for Pulijudam / Aadu Puli Aattam.
-
-export const NUM_POINTS = 25;
+export const NUM_POINTS = 24;
 export const TOTAL_GOATS = 15;
-export const GOATS_TO_WIN = 5; // Tigers win by capturing 5 goats
+export const GOATS_TO_WIN = 5;
 
-// Adjacency: orthogonal + diagonal connections on 5×5 grid
-// Row r, Col c => index = r*5 + c
-// Connections: horizontal, vertical, and diagonal based on standard board
-
+// Build adjacency from the board definition
 function buildAdjacency(): number[][] {
-  const adj: number[][] = Array.from({ length: 25 }, () => []);
+  const adj: number[][] = Array.from({ length: NUM_POINTS }, () => []);
 
-  for (let r = 0; r < 5; r++) {
+  function connect(a: number, b: number) {
+    if (!adj[a].includes(b)) adj[a].push(b);
+    if (!adj[b].includes(a)) adj[b].push(a);
+  }
+
+  // ── Triangle connections ──
+  // Left edge: 0-1-4
+  connect(0, 1); connect(1, 4);
+  // Center vertical: 0-2-6
+  connect(0, 2); connect(2, 6);
+  // Right edge: 0-3-8
+  connect(0, 3); connect(3, 8);
+  // Row 1 horizontal: 1-2-3
+  connect(1, 2); connect(2, 3);
+  // Row 2 / triangle base horizontal: 4-5-6-7-8
+  connect(4, 5); connect(5, 6); connect(6, 7); connect(7, 8);
+  // Verticals from row 1 to row 2: 1-5, 3-7
+  connect(1, 5); connect(3, 7);
+  // Diagonals inside triangle: 2-5, 2-7
+  connect(2, 5); connect(2, 7);
+
+  // ── Square grid connections ──
+  // Rows: 4-8 (row 0), 9-13 (row 1), 14-18 (row 2), 19-23 (row 3)
+  // Horizontal, vertical, and diagonals on even (r+c) parity
+  for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 5; c++) {
-      const i = r * 5 + c;
-      // Right
-      if (c + 1 < 5) {
-        adj[i].push(i + 1);
-        adj[i + 1].push(i);
+      const cur = 4 + r * 5 + c;
+      // Horizontal (right)
+      if (c + 1 < 5) connect(cur, cur + 1);
+      // Vertical (down)
+      if (r + 1 < 4) {
+        connect(cur, cur + 5);
       }
-      // Down
-      if (r + 1 < 5) {
-        adj[i].push(i + 5);
-        adj[i + 5].push(i);
-      }
-      // Diagonals: only on squares where (r+c) is even
-      if ((r + c) % 2 === 0) {
-        // Down-right
-        if (r + 1 < 5 && c + 1 < 5) {
-          adj[i].push(i + 6);
-          adj[i + 6].push(i);
-        }
-        // Down-left
-        if (r + 1 < 5 && c - 1 >= 0) {
-          adj[i].push(i + 4);
-          adj[i + 4].push(i);
-        }
+      // Diagonals: on even (r+c) parity nodes
+      if ((r + c) % 2 === 0 && r + 1 < 4) {
+        if (c + 1 < 5) connect(cur, cur + 6); // down-right
+        if (c - 1 >= 0) connect(cur, cur + 4); // down-left
       }
     }
   }
 
-  // Deduplicate
   return adj.map(list => [...new Set(list)].sort((a, b) => a - b));
 }
 
 export const ADJACENCY = buildAdjacency();
 
-// For tiger jumps: given tiger at `from`, jumping over `over` to `to`
-// `to` must be the mirror of `from` across `over`
 function getJumpTarget(from: number, over: number): number | null {
-  const fromR = Math.floor(from / 5), fromC = from % 5;
-  const overR = Math.floor(over / 5), overC = over % 5;
-  const toR = overR + (overR - fromR);
-  const toC = overC + (overC - fromC);
-  if (toR < 0 || toR >= 5 || toC < 0 || toC >= 5) return null;
-  const to = toR * 5 + toC;
-  // Verify the jump direction is a valid adjacency
+  // Find the position of both nodes and compute the mirror
+  const fromPos = POINT_POSITIONS[from];
+  const overPos = POINT_POSITIONS[over];
+  const toX = overPos.x * 2 - fromPos.x;
+  const toY = overPos.y * 2 - fromPos.y;
+
+  // Find the node at that position (within tolerance)
+  const target = POINT_POSITIONS.findIndex(p =>
+    Math.abs(p.x - toX) < 0.01 && Math.abs(p.y - toY) < 0.01
+  );
+
+  if (target < 0 || target >= NUM_POINTS) return null;
   if (!ADJACENCY[from].includes(over)) return null;
-  if (!ADJACENCY[over].includes(to)) return null;
-  return to;
+  if (!ADJACENCY[over].includes(target)) return null;
+  return target;
 }
 
 export interface GameState {
@@ -146,11 +104,10 @@ export interface GameState {
 
 export function createInitialState(): GameState {
   const board: Piece[] = Array(NUM_POINTS).fill(null);
-  // Tigers start at 4 corners
-  board[0] = 'tiger';
-  board[4] = 'tiger';
-  board[20] = 'tiger';
-  // Some variants place tigers differently; using 3 tigers at top + bottom-left
+  // Tigers start at apex and bottom two corners of the triangle
+  board[0] = 'tiger'; // apex
+  board[4] = 'tiger'; // triangle base left
+  board[8] = 'tiger'; // triangle base right
   return {
     board,
     turn: 'goat', // Goat always goes first
@@ -316,17 +273,50 @@ export function getAiMove(state: GameState): MoveInfo | null {
 }
 
 /** Board point positions for rendering (normalized 0-1) */
-export function getPointPositions(): { x: number; y: number }[] {
+// Triangle top (3 rows) + Square bottom (4 rows, shared top with triangle base)
+// Triangle: apex at center-top, expanding to 5 columns at base
+// Square: 5 columns × 4 rows below
+//
+// Node indices:
+// 0         = apex (row 0)
+// 1,2,3     = triangle row 1
+// 4,5,6,7,8 = triangle base / square row 0 (row 2)
+// 9-13      = square row 1 (row 3)
+// 14-18     = square row 2 (row 4)
+// 19-23     = square row 3 (row 5)
+//
+// Total rows: 6 (0-5), total height proportional
+// Triangle height ~2 units, square height ~3 units → total ~6 row positions
+
+const POINT_POSITIONS: { x: number; y: number }[] = (() => {
   const positions: { x: number; y: number }[] = [];
-  for (let r = 0; r < 5; r++) {
+  const totalRows = 6; // rows 0-5
+
+  // Row 0: apex (1 node)
+  positions.push({ x: 0.5, y: 0 / (totalRows - 1) });
+
+  // Row 1: 3 nodes (evenly spread across 5-col range: at columns 1, 2, 3)
+  for (let c = 0; c < 3; c++) {
+    positions.push({ x: (c + 1) / 4, y: 1 / (totalRows - 1) });
+  }
+
+  // Row 2: triangle base = square row 0 (5 nodes at columns 0-4)
+  for (let c = 0; c < 5; c++) {
+    positions.push({ x: c / 4, y: 2 / (totalRows - 1) });
+  }
+
+  // Row 3-5: square rows 1-3 (5 nodes each)
+  for (let r = 3; r <= 5; r++) {
     for (let c = 0; c < 5; c++) {
-      positions.push({
-        x: c / 4,
-        y: r / 4,
-      });
+      positions.push({ x: c / 4, y: r / (totalRows - 1) });
     }
   }
+
   return positions;
+})();
+
+export function getPointPositions(): { x: number; y: number }[] {
+  return POINT_POSITIONS;
 }
 
 /** Get all lines (edges) for rendering */

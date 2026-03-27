@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from './hooks/useGame';
 import { PITS_PER_SIDE } from './utils/game';
 
@@ -9,6 +10,7 @@ function Seeds({ count }: { count: number }) {
 export default function App() {
   const { state, wins, vsAi, newGame, toggleMode, handlePitClick, canPick } = useGame();
   const { pits, stores, currentPlayer, gameOver, winner } = state;
+  const [showRules, setShowRules] = useState(false);
 
   // Player 2's pits: indices 13→7 (displayed left-to-right for Player 2)
   const topRow = Array.from({ length: PITS_PER_SIDE }, (_, i) => 13 - i);
@@ -20,6 +22,7 @@ export default function App() {
       <div className="game-header">
         <a href="/" className="back-link">← Games</a>
         <h1>Pallanguzhi</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
         <button className="btn btn-secondary" onClick={newGame}>New</button>
       </div>
 
@@ -111,6 +114,32 @@ export default function App() {
           Switch to {vsAi ? '2 Player' : 'vs AI'}
         </button>
       </div>
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play Pallanguzhi</h2>
+            <h3>About</h3>
+            <p>Pallanguzhi is a traditional South Indian mancala game played on a board with 14 pits and cowrie shells.</p>
+            <h3>Setup</h3>
+            <ul>
+              <li>Each player has <strong>7 pits</strong> on their side with <strong>6 seeds</strong> each (84 total).</li>
+            </ul>
+            <h3>How to Play</h3>
+            <ul>
+              <li>On your turn, pick a pit on <strong>your side</strong> and sow the seeds <strong>one per pit</strong> counter-clockwise.</li>
+              <li>If the last seed lands in a pit with seeds, <strong>pick them up</strong> and keep sowing.</li>
+              <li>If the next pit is <strong>empty</strong> but the one after has seeds, <strong>capture</strong> those seeds into your store.</li>
+              <li>Your turn ends when you can’t continue.</li>
+            </ul>
+            <h3>Winning</h3>
+            <p>When one side is empty, remaining seeds go to the other player. The player with <strong>more seeds</strong> wins!</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {gameOver && (
         <div className="game-over-overlay">

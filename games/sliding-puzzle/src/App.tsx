@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from './hooks/useGame';
 
 function formatTime(s: number): string {
@@ -8,6 +9,7 @@ function formatTime(s: number): string {
 
 export default function App() {
   const { board, moves, timer, bestTime, won, lastMove, newGame, handleTileClick, canMoveTile } = useGame();
+  const [showRules, setShowRules] = useState(false);
 
   // Build tile list: for each non-null value, compute its row/col from the board array
   const tiles = board
@@ -19,6 +21,7 @@ export default function App() {
       <div className="game-header">
         <a href="/" className="back-link">← Games</a>
         <h1>15 Puzzle</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
         <button className="btn btn-secondary" onClick={newGame}>New</button>
       </div>
 
@@ -73,6 +76,28 @@ export default function App() {
       </div>
 
       <p className="hint-text">Click, use arrow keys, or WASD to slide tiles</p>
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play 15 Puzzle</h2>
+            <h3>Goal</h3>
+            <p>Arrange tiles 1–15 in order by sliding them into the empty space.</p>
+            <h3>Rules</h3>
+            <ul>
+              <li><strong>Click</strong> a tile adjacent to the empty space to slide it.</li>
+              <li>Use <strong>arrow keys</strong> or <strong>WASD</strong> to slide tiles.</li>
+              <li>Tiles highlighted in <strong>purple</strong> are movable.</li>
+              <li>Tiles in the correct position turn <strong>teal</strong>.</li>
+            </ul>
+            <h3>Scoring</h3>
+            <p>Solve the puzzle in as few moves and as little time as possible. Your best time is saved!</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {won && (
         <div className="game-over-overlay">

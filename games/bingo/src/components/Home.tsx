@@ -9,6 +9,7 @@ export default function Home() {
   const { state, dispatch, createRoom, joinRoom } = useGame();
   const [mode, setMode] = useState<'menu' | 'join' | 'join-link'>('menu');
   const [code, setCode] = useState('');
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -43,6 +44,7 @@ export default function Home() {
         <h1>BINGO</h1>
         <p className="subtitle">Indian Style</p>
       </div>
+      <button className="rules-btn" style={{ margin: '0 auto 1rem' }} onClick={() => setShowRules(true)}>?</button>
 
       {mode === 'menu' && (
         <div className="home-actions">
@@ -122,6 +124,32 @@ export default function Home() {
       {state.error && (
         <div className="error-toast" onClick={() => dispatch({ type: 'CLEAR_ERROR' })}>
           {state.error}
+        </div>
+      )}
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play Bingo</h2>
+            <h3>About</h3>
+            <p>Indian-style Bingo for 2 players. Each player fills their own 5×5 grid with numbers 1–25, then takes turns calling numbers.</p>
+            <h3>Setup</h3>
+            <ul>
+              <li>Create or join a room with a 6-character code.</li>
+              <li>Fill your 5×5 board with numbers 1–25 in any order.</li>
+            </ul>
+            <h3>Gameplay</h3>
+            <ul>
+              <li>Players take turns calling a number (1–25).</li>
+              <li>Both players mark the called number on their board.</li>
+              <li>Complete a full <strong>row, column, or diagonal</strong> to score a letter: <strong>B‑I‑N‑G‑O</strong>.</li>
+            </ul>
+            <h3>Winning</h3>
+            <p>First player to complete 5 lines and spell <strong>BINGO</strong> wins! Series mode lets you play best-of rounds.</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

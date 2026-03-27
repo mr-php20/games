@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from './hooks/useGame';
 import {
   PLAYER_COLORS, PLAYER_NAMES, PLAYERS, TOKENS_PER_PLAYER,
@@ -51,6 +52,7 @@ export default function App() {
   } = useGame();
 
   const { tokens, currentPlayer, diceValue, gameOver, rankings, message } = state;
+  const [showRules, setShowRules] = useState(false);
 
   const movableIds = new Set(movableTokens.map(t => `${t.player}-${t.index}`));
 
@@ -59,6 +61,7 @@ export default function App() {
       <div className="game-header">
         <a href="/" className="back-link">← Games</a>
         <h1>Ludo</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
         <button className="btn btn-secondary" onClick={newGame}>New</button>
       </div>
 
@@ -166,6 +169,34 @@ export default function App() {
         </div>
         <p className="hint-text">{message}</p>
       </div>
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play Ludo</h2>
+            <h3>About</h3>
+            <p>Ludo is a classic Indian board game derived from Pachisi. Race your 4 tokens from base to home before your opponents!</p>
+            <h3>Rules</h3>
+            <ul>
+              <li>Roll the dice by clicking/tapping it.</li>
+              <li>Roll a <strong>6</strong> to bring a token out of the base onto the start square.</li>
+              <li>Move a token forward by the number rolled.</li>
+              <li>Rolling a <strong>6</strong> or making a <strong>capture</strong> earns an extra turn.</li>
+              <li>Three consecutive 6s forfeit your turn.</li>
+            </ul>
+            <h3>Captures</h3>
+            <ul>
+              <li>Landing on an opponent’s token sends it back to their base.</li>
+              <li><strong>Star squares</strong> (teal border) are safe — no captures there.</li>
+            </ul>
+            <h3>Winning</h3>
+            <p>Move all 4 tokens along the full track and up your home column to the center. The first player to finish all tokens wins!</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {gameOver && (
         <div className="game-over-overlay">

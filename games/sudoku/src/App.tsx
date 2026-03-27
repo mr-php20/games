@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from './hooks/useGame';
 import { Difficulty } from './utils/generator';
 
@@ -12,6 +13,7 @@ export default function App() {
     puzzle, board, selected, difficulty, errors, completed, timer,
     newGame, selectCell, enterNumber, eraseCell,
   } = useGame();
+  const [showRules, setShowRules] = useState(false);
 
   const difficulties: Difficulty[] = ['easy', 'medium', 'hard'];
 
@@ -20,6 +22,7 @@ export default function App() {
       <div className="game-header">
         <a href="/" className="back-link">← Games</a>
         <h1>Sudoku</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
         <div className="score-box" style={{ padding: '0.4rem 0.8rem' }}>
           <span className="label">Time</span>
           <span className="value" style={{ fontSize: '1rem' }}>{formatTime(timer)}</span>
@@ -80,6 +83,30 @@ export default function App() {
       </div>
 
       <p className="hint-text">Click a cell, then tap a number · Arrow keys to navigate</p>
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play Sudoku</h2>
+            <h3>Goal</h3>
+            <p>Fill the 9×9 grid so every row, column, and 3×3 box contains digits 1 through 9.</p>
+            <h3>Rules</h3>
+            <ul>
+              <li>Click a cell to select it, then enter a number (1–9).</li>
+              <li>Navigate with <strong>arrow keys</strong> or <strong>WASD</strong>.</li>
+              <li>Each digit must appear <strong>exactly once</strong> in every row, column, and 3×3 box.</li>
+              <li>Pre-filled clue cells cannot be changed.</li>
+              <li>Errors are highlighted in <strong>red</strong>.</li>
+              <li>Press <strong>Backspace</strong> or <strong>Delete</strong> to erase.</li>
+            </ul>
+            <h3>Difficulty</h3>
+            <p>Choose Easy, Medium, or Hard. Harder puzzles have fewer starting clues.</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {completed && (
         <div className="game-over-overlay">

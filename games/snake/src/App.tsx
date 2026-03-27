@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGame } from './hooks/useGame';
 import { Direction } from './utils/game';
 
@@ -6,6 +7,7 @@ export default function App() {
     snake, food, score, highScore, gameOver, paused, started,
     gridSize, newGame, changeDirection, togglePause,
   } = useGame();
+  const [showRules, setShowRules] = useState(false);
 
   const headKey = `${snake[0].x},${snake[0].y}`;
   const foodKey = `${food.x},${food.y}`;
@@ -21,6 +23,7 @@ export default function App() {
       <div className="game-header">
         <a href="/" className="back-link">← Games</a>
         <h1>Snake</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
         <button className="btn btn-secondary" onClick={newGame}>New</button>
       </div>
 
@@ -79,6 +82,29 @@ export default function App() {
       </div>
 
       <p className="hint-text">Arrow keys / WASD · Space to pause · Swipe on mobile</p>
+
+      {showRules && (
+        <div className="rules-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-card" onClick={e => e.stopPropagation()}>
+            <h2>How to Play Snake</h2>
+            <h3>Goal</h3>
+            <p>Eat food to grow the snake and score points. Survive as long as possible!</p>
+            <h3>Rules</h3>
+            <ul>
+              <li>Control the snake with <strong>arrow keys</strong>, <strong>WASD</strong>, <strong>swipe</strong>, or the <strong>D-pad</strong>.</li>
+              <li>Eat the food (colored dot) to grow longer and earn points.</li>
+              <li>Don't crash into the <strong>walls</strong> or your own <strong>tail</strong>.</li>
+              <li>The snake speeds up as your score increases.</li>
+              <li>Press <strong>Space</strong> to pause/resume.</li>
+            </ul>
+            <h3>Scoring</h3>
+            <p>Each food eaten adds 1 point. Your high score is saved locally.</p>
+            <div className="rules-close">
+              <button className="btn btn-primary" onClick={() => setShowRules(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {gameOver && (
         <div className="game-over-overlay">
