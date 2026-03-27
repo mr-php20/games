@@ -104,6 +104,16 @@
   font-size: 1.1rem;
 }
 
+.hint-btn {
+  font-size: 0.85rem;
+  gap: 2px;
+}
+
+.hint-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 
 @media (max-width: 380px) {
   .sudoku-cell { font-size: 0.9rem; }

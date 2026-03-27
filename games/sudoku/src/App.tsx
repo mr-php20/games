@@ -10,8 +10,8 @@ function formatTime(s: number): string {
 
 export default function App() {
   const {
-    puzzle, board, selected, difficulty, errors, completed, timer,
-    newGame, selectCell, enterNumber, eraseCell,
+    puzzle, board, selected, difficulty, errors, completed, timer, hintsRemaining,
+    newGame, selectCell, enterNumber, eraseCell, useHint,
   } = useGame();
   const [showRules, setShowRules] = useState(false);
 
@@ -80,6 +80,7 @@ export default function App() {
           </button>
         ))}
         <button className="numpad-btn erase-btn" onClick={eraseCell}>⌫</button>
+        <button className="numpad-btn hint-btn" onClick={useHint} disabled={hintsRemaining <= 0}>💡{hintsRemaining}</button>
       </div>
 
       <p className="hint-text">Click a cell, then tap a number · Arrow keys to navigate</p>

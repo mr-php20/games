@@ -10,6 +10,7 @@ interface GameState {
   errors: boolean[][];
   completed: boolean;
   timer: number;
+  hintsRemaining: number;
 }
 
 export function useGame() {
@@ -24,6 +25,7 @@ export function useGame() {
       errors: Array.from({ length: 9 }, () => Array(9).fill(false)),
       completed: false,
       timer: 0,
+      hintsRemaining: 10,
     };
   });
 
@@ -52,6 +54,7 @@ export function useGame() {
       errors: Array.from({ length: 9 }, () => Array(9).fill(false)),
       completed: false,
       timer: 0,
+      hintsRemaining: 10,
     });
   }, []);
 
@@ -88,6 +91,22 @@ export function useGame() {
     });
   }, []);
 
+  const useHint = useCallback(() => {
+    setState(prev => {
+      if (!prev.selected || prev.completed || prev.hintsRemaining <= 0) return prev;
+      const [r, c] = prev.selected;
+      if (prev.puzzle[r][c] !== 0) return prev; // already a clue
+      if (prev.board[r][c] === prev.solution[r][c]) return prev; // already correct
+
+      const newBoard = prev.board.map(row => [...row]);
+      newBoard[r][c] = prev.solution[r][c];
+      const errors = checkErrors(newBoard, prev.solution);
+      const completed = isBoardComplete(newBoard, prev.solution);
+
+      return { ...prev, board: newBoard, errors, completed, hintsRemaining: prev.hintsRemaining - 1 };
+    });
+  }, []);
+
   // Keyboard
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -119,5 +138,5 @@ export function useGame() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [enterNumber, eraseCell, selectCell, state.selected]);
 
-  return { ...state, newGame, selectCell, enterNumber, eraseCell };
+  return { ...state, newGame, selectCell, enterNumber, eraseCell, useHint };
 }

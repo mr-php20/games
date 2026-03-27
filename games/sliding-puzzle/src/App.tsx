@@ -8,7 +8,7 @@ function formatTime(s: number): string {
 }
 
 export default function App() {
-  const { board, moves, timer, bestTime, won, lastMove, newGame, handleTileClick, canMoveTile } = useGame();
+  const { board, moves, timer, bestTime, won, lastMove, newGame, handleTileClick } = useGame();
   const [showRules, setShowRules] = useState(false);
 
   // Build tile list: for each non-null value, compute its row/col from the board array
@@ -62,7 +62,6 @@ export default function App() {
               key={isLastMoved ? `${t.val}-${moves}` : t.val}
               className={[
                 'puzzle-tile',
-                canMoveTile(t.idx) ? 'movable' : '',
                 t.val === t.idx + 1 ? 'correct' : '',
                 isLastMoved ? 'tile-sliding' : '',
               ].filter(Boolean).join(' ')}
@@ -87,7 +86,6 @@ export default function App() {
             <ul>
               <li><strong>Click</strong> a tile adjacent to the empty space to slide it.</li>
               <li>Use <strong>arrow keys</strong> or <strong>WASD</strong> to slide tiles.</li>
-              <li>Tiles highlighted in <strong>purple</strong> are movable.</li>
               <li>Tiles in the correct position turn <strong>teal</strong>.</li>
             </ul>
             <h3>Scoring</h3>
