@@ -25,7 +25,7 @@ interface GameState {
   error: string | null;
 }
 
-const serverUrl = (import.meta as Record<string, Record<string, string>>).env?.VITE_SERVER_URL ?? 'http://localhost:3001';
+const serverUrl = (import.meta as unknown as Record<string, Record<string, string>>).env?.VITE_SERVER_URL ?? 'http://localhost:3001';
 
 export function useGame() {
   const [state, setState] = useState<GameState>({
