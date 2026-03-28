@@ -42,7 +42,7 @@ export default function GameBoard() {
 
   return (
     <div className="screen game-screen">
-      <div className="game-header">
+      <div className="bingo-board-header">
         {bestOf > 1 && (
           <div className="round-info">
             Round {currentRound} of {bestOf}

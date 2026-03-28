@@ -239,7 +239,7 @@ export default function App() {
               className={`cr-player-chip ${isCurrent ? 'active' : ''} ${isEliminated ? 'eliminated' : ''}`}
               style={{ '--player-color': getColor(p.colorIndex) } as React.CSSProperties}
             >
-              {isLocal ? p.name.slice(0, 6) : p.id === game.playerId ? 'You' : p.name.slice(0, 6)}
+              {isLocal ? p.name : p.id === game.playerId ? 'You' : p.name.slice(0, 8)}
             </div>
           );
         })}
@@ -249,7 +249,7 @@ export default function App() {
         {game.screen === 'game-over'
           ? `🎉 ${game.winnerName} wins!`
           : isLocal
-            ? `${currentPlayer?.name ?? 'Player'}'s turn — tap a cell`
+            ? `${currentPlayer?.name ?? 'Player 1'}'s turn — tap a cell`
             : game.amEliminated
               ? 'You were eliminated — watching…'
               : game.isMyTurn ? 'Your turn — tap a cell' : `${currentPlayer?.name ?? 'Opponent'}'s turn`}

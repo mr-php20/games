@@ -38,37 +38,27 @@ export default function Home() {
   };
 
   return (
-    <div className="screen home-screen">
-      <a href="/" className="back-link">← Games</a>
-      <div className="logo">
-        <h1>BINGO</h1>
-        <p className="subtitle">Indian Style</p>
+    <div className="game-app">
+      <div className="game-header">
+        <a href="/" className="back-link">← Games</a>
+        <h1>Bingo</h1>
+        <button className="rules-btn" onClick={() => setShowRules(true)}>?</button>
       </div>
-      <button className="rules-btn" style={{ margin: '0 auto 1rem' }} onClick={() => setShowRules(true)}>?</button>
 
       {mode === 'menu' && (
         <div className="home-actions">
           <input
             type="text"
-            className="input-name"
             placeholder="Enter your name (min 3 chars)"
             value={state.playerName}
             onChange={handleNameChange}
             maxLength={20}
             autoComplete="off"
           />
-          <button
-            className="btn btn-primary"
-            onClick={handleCreate}
-            disabled={nameTooShort}
-          >
+          <button className="btn btn-primary" onClick={handleCreate} disabled={nameTooShort}>
             Create Game
           </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => { if (!nameTooShort) setMode('join'); }}
-            disabled={nameTooShort}
-          >
+          <button className="btn btn-secondary" onClick={() => { if (!nameTooShort) setMode('join'); }} disabled={nameTooShort}>
             Join Game
           </button>
         </div>
@@ -79,7 +69,6 @@ export default function Home() {
           <p className="join-link-info">Joining as <strong>{state.playerName}</strong></p>
           <input
             type="text"
-            className="input-code"
             placeholder="Enter room code"
             value={code}
             onChange={e => setCode(e.target.value.toUpperCase())}
@@ -87,16 +76,10 @@ export default function Home() {
             autoComplete="off"
             style={{ textTransform: 'uppercase', letterSpacing: '0.3em', textAlign: 'center' }}
           />
-          <button
-            className="btn btn-primary"
-            onClick={handleJoin}
-            disabled={!code.trim() || code.trim().length < 6 || nameTooShort}
-          >
+          <button className="btn btn-primary" onClick={handleJoin} disabled={!code.trim() || code.trim().length < 6 || nameTooShort}>
             Join Room
           </button>
-          <button className="btn btn-text" onClick={() => setMode('menu')}>
-            Back
-          </button>
+          <button className="btn btn-text" onClick={() => setMode('menu')}>Back</button>
         </div>
       )}
 
@@ -105,18 +88,13 @@ export default function Home() {
           <p className="join-link-info">Joining room <strong>{code}</strong></p>
           <input
             type="text"
-            className="input-name"
             placeholder="Enter your name (min 3 chars)"
             value={state.playerName}
             onChange={handleNameChange}
             maxLength={20}
             autoComplete="off"
           />
-          <button
-            className="btn btn-primary"
-            onClick={handleJoin}
-            disabled={nameTooShort}
-          >
+          <button className="btn btn-primary" onClick={handleJoin} disabled={nameTooShort}>
             Join Game
           </button>
         </div>

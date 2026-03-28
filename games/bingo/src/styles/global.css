@@ -49,46 +49,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Home Screen ===== */
-.logo h1 {
-  font-family: 'Sora', sans-serif;
-  font-size: 3.5rem;
-  font-weight: 800;
-  letter-spacing: 0.25em;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: center;
-}
-
-.logo .subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  margin-top: 4px;
-  letter-spacing: 0.15em;
-}
-
-.home-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 320px;
-}
-
-.join-link-info {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-.join-link-info strong {
-  color: var(--accent-1-light);
-  letter-spacing: 0.15em;
-}
-
 /* ===== Inputs ===== */
 input[type="text"] {
   border-width: 2px;
@@ -99,10 +59,6 @@ input[type="text"] {
 .btn {
   padding: 14px 24px;
   font-size: 1rem;
-}
-
-.btn-start {
-  margin-top: 8px;
 }
 
 /* ===== Lobby ===== */
@@ -247,7 +203,7 @@ input[type="text"] {
 }
 
 /* ===== Game Board ===== */
-.game-header {
+.bingo-board-header {
   display: flex;
   flex-direction: column;
   align-items: center;
